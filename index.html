@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title></title>
+		<link href="static/style/main.css" rel="stylesheet">
+	</head>
+	<body>
+		<div id="page">
+			<div v-if="page != 'auth'" id="menu">
+				<button v-on:click="showSubMenu()">Учеба</button>
+				<button v-on:click="changePage('progress')">Успеваемость</button>
+				<button v-on:click="changePage('payment')">Оплата</button>
+				<button v-on:click="changePage('profile')">Профиль</button>
+			</div>
+			<div v-show="stud_menu" class="studing-menu">
+				<button v-on:click="changePage('studing')" class="stud-menu1">Расписание</button>
+				<button v-on:click="changePage('subj')" class="stud-menu2">Предметы</button>
+			</div>
+			<div v-if="page == 'auth'" class = "auth">
+				<form class="auth-window">
+					<h2>Авторизация</h2>
+					<input class="input" type="text" value="Логин">
+					<input class="input" type="password" value="Пароль">
+					<input class="enter" v-on:click="enter('studing')" type="submit" value="Войти">
+				</form>
+			</div>
+			<div v-else-if="page == 'studing'" class="table">
+				<button v-on:click="changeWeek('week1')" class="week1" v-bind:class="{'week1_clicked': week}">Неделя 1</button>
+				<button v-on:click="changeWeek('week2')" class="week2" v-bind:class="{'week2_clicked': !week}">Неделя 2</button>
+				<table class="tab">
+					<tr>
+						<th class="th">Номер пары</th>
+						<th class="th"> Наименование</th>
+						<th class="th">Аудитория</th>
+						<th class="th">Преподаватель</th>
+					</tr>
+				</table>
+				<table class="tab" v-for="(day, index) in days">
+					<tr>
+						<th class="th">{{day_name[index]}}</th>
+					</tr>
+					<tr>
+						<th class="date">{{day_date[index]}}</th>
+					</tr>
+					<tr v-for="row in day">
+						<td class="td">{{row['number']}}</td>
+						<td class="td">{{row['name']}}</td>
+						<td class="td">{{row['cabinet']}}</td>
+						<td class="td"><button class="lector" v-on:click="teachTable(row['lector'])">{{row['lector']}}</button></td>
+					</tr>
+				</table>
+			</div>
+			<div v-else-if="page == 'subj'" class="subj">
+				<div class="sub-menu">
+					<button v-for="sub in all_subj" v-on:click="openSubj(sub)"
+					v-bind:class="{'subj-act':subj_now == sub}">{{sub}}</button>
+				</div>
+				<h2>Контрольные точки</h2>
+				<table>
+					<tr class = "sub-head">
+						<th>Дата</th>
+						<th>Оценка</th>
+					</tr>
+					<tr v-for="sub in sub_kt">
+						<td>{{sub['date']}}</td>
+						<td>{{sub['mark']}}</td>
+					</tr>
+				</table>
+				<h2>Лабораторные работы</h2>
+				<table>
+					<tr class = "sub-head">
+						<th>Дата</th>
+						<th>Оценка</th>
+					</tr>
+					<tr v-for="sub in sub_kt">
+						<td>{{sub['date']}}</td>
+						<td>{{sub['mark']}}</td>
+					</tr>
+				</table>
+				<h2>Методические материалы</h2>
+				<div class="sub-download">
+					<p>Скачать методические указания</p>
+					<input type="image" src="./static/images/download.png" alt="Скачать">
+				</div>
+			</div>
+			<div v-else-if="page == 'teach_table'" class="table">
+				<button v-on:click="changeWeek('week1')" class="week1" v-bind:class="{'week1_clicked': week}">Неделя 1</button>
+				<button v-on:click="changeWeek('week2')" class="week2" v-bind:class="{'week2_clicked': !week}">Неделя 2</button>
+				<table class="tab">
+					<tr>
+						<th class="th">Номер пары</th>
+						<th class="th"> Наименование</th>
+						<th class="th">Аудитория</th>
+						<th class="th">Преподаватель</th>
+					</tr>
+				</table>
+				<table class="tab" v-for="(day, index) in days">
+					<tr>
+						<th class="th">{{day_name[index]}}</th>
+					</tr>
+					<tr>
+						<th class="date">{{day_date[index]}}</th>
+					</tr>
+					<tr v-for="row in day">
+						<td class="td">{{row['number']}}</td>
+						<td class="td">{{row['name']}}</td>
+						<td class="td">{{row['cabinet']}}</td>
+						<td class="td">{{row['lector']}}</td>
+					</tr>
+				</table>
+			</div>
+			<div v-else-if="page == 'progress'" class="progress">
+				<button v-on:click="changeProgress('book')" class="book" v-bind:class="{'book_clicked': progress}">Зачетная книжка</button>
+				<button v-on:click="changeProgress('kt')" class="kt" v-bind:class="{'kt_clicked': !progress}">Контрольные точки</button>
+				<div v-if="progress">
+					<table class="prog">
+						<tr>
+							<th class="ph">Наименование</th>
+							<th class="ph">Тип аттестации</th>
+							<th class="ph">Оценка</th>
+						</tr>
+					</table>
+					<table class="prog">
+						<tr v-for="sub in subject">
+							<td class="pd">{{sub['name']}}</td>
+							<td class="pd">{{sub['type']}}</td>
+							<td class="pd">{{sub['mark']}}</td>
+						</tr>
+					</table>
+				</div>
+				<div v-else>
+					<table class="prog">
+						<tr>
+							<th class="ph"> Наименование</th>
+							<th class="ph">Дата</th>
+							<th class="ph">Оценка</th>
+						</tr>
+					</table>
+					<table class="prog">
+						<tr v-for="sub in subjects">
+							<td class="pd">{{sub['name']}}</td>
+							<td class="pd">{{sub['date']}}</td>
+							<td class="pd">{{sub['mark']}}</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			<div v-else-if="page == 'payment'" class="payment">
+				<h2 class="payment-h">Категории для оплаты:</h2>
+				<button class="studing-p">Обучение</button>
+				<button class="obshj">Общежитие</button>
+				<button class="statia">Статья</button>
+				<button class="studsovet">Студсовет</button>
+			</div>
+			<div v-else-if="page == 'profile'" class="profile">
+				<h2>{{username}}</h2>
+				<div v-for="inf in information" class="userinf">
+					<p>{{inf}}</p>
+				</div>
+			</div>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.14"></script>
+		<script>
+		var app = new Vue({
+			el: '#page',
+			data: {
+				page: 'auth',
+				stud_menu:false,
+				subj_now:'sub1',
+				username: 'Имя Пользователя',
+				week: true,
+				day_name: ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
+				day_date: ['10.01.2022','11.01.2022','12.01.2022','13.01.2022','14.01.2022','14.01.2022'],
+				days: [[{'number': 1, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 2, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 3, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'}],
+				[{'number': 1, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 2, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 3, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'}],
+				[{'number': 1, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 2, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 3, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'}],
+				[{'number': 1, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 2, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'},
+				{'number': 3, 'name':'Предмет', 'cabinet': '9-402', 'lector':'Препод'}]],
+				progress: true,
+				subjects:[{'name': 'Предмет', 'date': '11.01.2022', 'mark': 'Хорошо'},
+				{'name': 'Предмет', 'date': '11.01.2022', 'mark': 'Хорошо'},
+				{'name': 'Предмет', 'date': '11.01.2022', 'mark': 'Хорошо'}],
+				subject:[{'name': 'Предмет', 'type': 'Зачет', 'mark': 'Зачет'},
+				{'name': 'Предмет', 'type': 'Дифференцированный зачет', 'mark': '5'},
+				{'name': 'Предмет', 'type': 'Экзамен', 'mark': '4'}],
+				sub_kt: [{'date': '14.01.2022', 'mark': '5'},
+				{'date': '14.01.2022', 'mark': '5'},
+				{'date': '14.01.2022', 'mark': '5'}],
+				all_subj:['sub1', 'sub2', 'sub3', 'sub4'],
+				information: ['Группа','Курс','Кафедра']
+			},
+			methods:{
+				changePage(name){
+					this.page = name;
+					this.stud_menu = false;
+				},
+				showSubMenu(){
+					this.stud_menu = !this.stud_menu;
+				},
+				changeWeek(w){
+					if (this.week == true && w == 'week1'){
+						return;
+					}
+					else if (this.week == false && w == 'week2'){
+						return;
+					}
+					else{
+						this.week = !this.week;
+					}
+				},
+				changeProgress(pr){
+					if (this.progress == true && pr == 'book'){
+						return;
+					}
+					else if (this.progress == false && pr == 'kt'){
+						return;
+					}
+					else{
+						this.progress = !this.progress;
+					}
+				},
+				teachTable(lector){
+					this.page = 'teach_table'
+				},
+				openSubj(subj){
+					this.subj_now = subj;
+				},
+				enter(page){
+					this.page = page;
+				}
+			}
+		});
+		</script>
+	</body>
+</html>
